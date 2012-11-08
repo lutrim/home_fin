@@ -12,6 +12,13 @@
 	
 </head>
 <BODY>
+<?php
+$link;
+putenv("TZ=Europe/Moscow");
+//-----------------------------> Connect on DB
+include 'function_lib.php';
+connect_to_db('lut_fin', 'mysql.lutrim.com', 'fin_root', 'fin_prog');
+?>
 <TABLE class="main">
 <TR><TD>
   <form action="show_rests.php" method="post"> 
@@ -66,19 +73,6 @@ if (date_create($f_date_invers) < date_create($s_date_invers)) {
 //print_r($_POST); 
 //echo " ПОСТ </br></br></br>";
 
-$db_name="lut_fin";	//база данных
-$host="mysql.lutrim.com";	//хост
-$user="fin_root";    //логин
-$pass="fin_prog";		//password
-
-//законнектимся - получаем link-идентификатор или вывод номера и текста ошибки
-//с последующим прерыванием работы скрипта (die())
-$link=mysql_connect($host,$user,$pass) or die(mysql_errno($link).mysql_error($link));
-//выбираем базу данных fin, созданную нами ранее
-$db=mysql_select_db($db_name,$link) or die(mysql_errno($link).mysql_error($link));
-//установка региональных настроек, кодировка, часовой пояс
-mysql_set_charset('utf8',$link); 
-$result=mysql_query("SET time_zone='+4:00';",$link) or die(mysql_errno($link).mysql_error($link));
 ?>
 
 <!-- таблица остатков -->

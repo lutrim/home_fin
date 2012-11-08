@@ -13,21 +13,11 @@
 </head>
 <BODY>
 <?php
-//блок коннекта к базе данных
-
-$db_name="lut_fin";	//база данных
-$host="mysql.lutrim.com";	//хост
-$user="fin_root";    //логин
-$pass="fin_prog";		//password
-
-//законнектимся - получаем link-идентификатор или вывод номера и текста ошибки
-//с последующим прерыванием работы скрипта (die())
-$link=mysql_connect($host,$user,$pass) or die(mysql_errno($link).mysql_error($link));
-//выбираем базу данных fin, созданную нами ранее
-$db=mysql_select_db($db_name,$link) or die(mysql_errno($link).mysql_error($link));
-//установка региональных настроек, кодировка, часовой пояс
-mysql_set_charset('utf8',$link); 
-$result=mysql_query("SET time_zone='+4:00';",$link) or die(mysql_errno($link).mysql_error($link));
+$link;
+putenv("TZ=Europe/Moscow");
+//-----------------------------> Connect on DB
+include 'function_lib.php';
+connect_to_db('lut_fin', 'mysql.lutrim.com', 'fin_root', 'fin_prog');
 ?>
 
 <TABLE class="main">
@@ -61,39 +51,39 @@ $result=mysql_query("SET time_zone='+4:00';",$link) or die(mysql_errno($link).my
 <TR><TD>
 <?php
 //блок преобразования дат в удобоваримый для php & mysql
-$date_tmp=explode(" ",$_POST["s_op_date"]);
-$s_date_invers=$date_tmp[2];
-for ($i=1;$i>=0;$i--){
-	if (strlen($date_tmp[$i])==1) {$date_tmp[$i] = "0".$date_tmp[$i];};
-	$s_date_invers .="-".$date_tmp[$i];
-}
-$date_tmp=explode(" ",$_POST["f_op_date"]);
-$f_date_invers=$date_tmp[2];
-for ($i=1;$i>=0;$i--){
-	if (strlen($date_tmp[$i])==1) {$date_tmp[$i] = "0".$date_tmp[$i];};
-	$f_date_invers .="-".$date_tmp[$i];
-}
+$s_date_invers=inverse_date($_POST["s_op_date"]);
+$f_date_invers=inverse_date($_POST["f_op_date"]);
+
 //блок преобразования дат завершен
 
 //echo date_create($f_date_invers)->format('d-m-Y')."   <    ".date_create($s_date_invers)->format('d-m-Y')."</br>";
-//блок проверок. Проверка на правильность параметров:
-$data=date_create($f_date_invers);
-if (!$data) {
-	echo "Один из параметров введен не верно. Еще раз? </br>";
-	echo "<a href=index.php> Вернуться на главную страницу</a>";
-	die;
-}
-$data=date_create($s_date_invers);
-if (!$data) {
-	echo "Один из параметров введен не верно. Еще раз? </br>";
-	echo "<a href=index.php> Вернуться на главную страницу</a>";
-	die;
-}
+//блок проверок. Проверка на правильность параметров или на их отсутствие:
+$flag_null=0; //флаг отсусттвия концов интервала(левого, правого или обоих, для формирования последующего запроса)
+if ($_POST["s_op_date"] == "") { $flag_null=1;}
+	else {
+	$data=date_create($s_date_invers);
+		if (!$data) {
+			echo "Дата начала интервала введена неверно. Еще раз? </br>";
+			echo "<a href=index.php> Вернуться на главную страницу</a>";
+			die;
+		};
+	}
+if ($_POST["f_op_date"] == "") { $flag_null += 2;}
+	else {
+	$data=date_create($f_date_invers);
+		if (!$data) {
+			echo "Дата конца интервала введена неверно. Еще раз? </br>";
+			echo "<a href=index.php> Вернуться на главную страницу</a>";
+			die;
+		};
+	}	
 //проверка на правильность интервала:
-if (date_create($f_date_invers) < date_create($s_date_invers)) {
-	echo "Дата окончания интервала  меньше даты начала интервала, внимательнее надо быть. Введи еще раз параметры </br>";
-	echo "<a href=index.php> Вернуться на главную страницу</a>";
-	die;
+if ($flag_null == 0) {
+	if (date_create($f_date_invers) < date_create($s_date_invers)) {
+		echo "Дата окончания интервала  меньше даты начала интервала, внимательнее надо быть. Введи еще раз параметры </br>";
+		echo "<a href=index.php> Вернуться на главную страницу</a>";
+		die;
+	};
 }
 //блок проверок завершен
  
@@ -106,31 +96,66 @@ if (date_create($f_date_invers) < date_create($s_date_invers)) {
 	/*echo "select sum(op_summ) from main_history 
 							where (op_date between '".$s_date_invers."' and '".$f_date_invers."') 
 							group by op_summ </br>"*/
-?>
-	<table class="info">
-	<!--заголовки -->
-		<tr>
-			<th class='info'> Дата </br> операции</th>
-			<th class='info'> Сумма </br> операции</th>
-			<th class='info'> Комментарии</th>
-			<th class='info'> группа операции</th>
-		</tr>
-	<?php
-	$result=mysql_query("select DATE_FORMAT(a.op_date,'%d-%m-%Y') as op_date,a.op_summ,a.comment,b.priznak_text 
-							from main_history as a INNER JOIN dir_pr as b
-								on a.priznak=b.priznak
-							where (a.op_date between '".$s_date_invers."' and '".$f_date_invers."') and 
-							(a.priznak in ('".implode("','",$_POST["op_group"])."')) order by a.op_date ASC",$link) or die(mysql_errno($link)." ".mysql_error($link));
-	while ($oper=mysql_fetch_row($result)) {
-		echo "<tr><td class='info'>".$oper[0]."</td><td class='info'>".$oper[1]."</td><td class='info'>".$oper[2]."</td><td class='info'>".$oper[3]."</td></tr>";
+?>	
+	<form action="delete_pack_op.php" method="post">
+		<table class="info">
+		<!--заголовки -->
+			<tr>
+				<th class='info'> Дата </br> операции</th>
+				<th class='info'> Сумма </br> операции</th>
+				<th class='info'> Комментарии</th>
+				<th class='info'> группа операции</th>
+				<th class='info'> </th>
+			</tr>
+		<?php
+		switch ($flag_null) {
+			case 0:
+				$result=mysql_query("select DATE_FORMAT(a.op_date,'%d-%m-%Y') as op_date,a.op_summ,a.comment,b.priznak_text,a.n_op 
+										from main_history as a INNER JOIN dir_pr as b
+											on a.priznak=b.priznak
+										where (a.op_date between '".$s_date_invers."' and '".$f_date_invers."') and 
+										(a.priznak in ('".implode("','",$_POST["op_group"])."')) order by a.op_date ASC",$link) 
+										or die(mysql_errno($link)." ".mysql_error($link));
+				break;
+			case 1:
+				$result=mysql_query("select DATE_FORMAT(a.op_date,'%d-%m-%Y') as op_date,a.op_summ,a.comment,b.priznak_text,a.n_op 
+										from main_history as a INNER JOIN dir_pr as b
+											on a.priznak=b.priznak
+										where (a.op_date <= '".$f_date_invers."') and 
+										(a.priznak in ('".implode("','",$_POST["op_group"])."')) order by a.op_date ASC",$link) 
+										or die(mysql_errno($link)." ".mysql_error($link));
+				break;
+			case 2:
+				$result=mysql_query("select DATE_FORMAT(a.op_date,'%d-%m-%Y') as op_date,a.op_summ,a.comment,b.priznak_text,a.n_op 
+										from main_history as a INNER JOIN dir_pr as b
+											on a.priznak=b.priznak
+										where (a.op_date >= '".$s_date_invers."') and 
+										(a.priznak in ('".implode("','",$_POST["op_group"])."')) order by a.op_date ASC",$link) 
+										or die(mysql_errno($link)." ".mysql_error($link));
+				break;
+			case 3:
+				$result=mysql_query("select DATE_FORMAT(a.op_date,'%d-%m-%Y') as op_date,a.op_summ,a.comment,b.priznak_text,a.n_op 
+										from main_history as a INNER JOIN dir_pr as b
+											on a.priznak=b.priznak
+										where (a.priznak in ('".implode("','",$_POST["op_group"])."')) order by a.op_date ASC",$link) 
+										or die(mysql_errno($link)." ".mysql_error($link));
+				break;
 		}
-	$result=mysql_query("select sum(op_summ) from main_history 
-							where (op_date between '".$s_date_invers."' and '".$f_date_invers."') and
-							(priznak in ('".implode("','",$_POST["op_group"])."'))",$link) or die(mysql_errno($link)." ".mysql_error($link));
-	$total=mysql_fetch_row($result);
-	echo "<tr><th class='info'>Итого</th><th class='info' colspan='3' align='left'>".$total[0]."</th>";
-	?>
-	</table>
+		$total=0.0;
+		while ($oper=mysql_fetch_row($result)) {
+			echo "<tr><td class='info'>".$oper[0]."</td><td class='info'>".$oper[1]."</td><td class='info'>".$oper[2]."</td><td class='info'>".$oper[3]."</td>
+					<td><input type='checkbox' name='".$oper[4]."'/></td></tr>";
+			$total += $oper[1];
+			}
+		/*$result=mysql_query("select sum(op_summ) from main_history 
+								where (op_date between '".$s_date_invers."' and '".$f_date_invers."') and
+								(priznak in ('".implode("','",$_POST["op_group"])."'))",$link) or die(mysql_errno($link)." ".mysql_error($link));
+		$total=mysql_fetch_row($result);*/
+		echo "<tr><th class='info'>Итого</th><th class='info' colspan='4' align='left'>".$total."</th>";
+		?>
+		</table>
+		<!-- <input type="submit" value="удалить отмеченные"/> -->
+	</form>
 </td>
 <td>
 

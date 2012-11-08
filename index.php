@@ -13,22 +13,11 @@
 </head>
 <BODY>
 <?php
-//------------------------> Подключение к БД
+$link;
+include 'function_lib.php';
 putenv("TZ=Europe/Moscow");
-
-$db_name="lut_fin";	//база данных
-$table="dir_pr";	//таблица
-$host="mysql.lutrim.com";	//хост
-$user="fin_root";		//логин
-$pass="fin_prog";		//password
-//законнектимся - получаем link-идентификатор или вывод номера и текста ошибки
-//с последующим прерыванием работы скрипта (die())
-$link=mysql_connect($host,$user,$pass) or die(mysql_errno($link).mysql_error($link));
-//выбираем базу данных BOOKS, созданную нами ранее
-$db=mysql_select_db($db_name,$link) or die(mysql_errno($link).mysql_error($link));
-//установка региональных настроек, кодировка, часовой пояс
-mysql_set_charset('utf8',$link); 
-$result=mysql_query("SET time_zone='+4:00';",$link) or die(mysql_errno($link).mysql_error($link));
+//-----------------------------> Connect on DB
+connect_to_db('lut_fin', 'mysql.lutrim.com', 'fin_root', 'fin_prog');
 ?>
 <TABLE class="main">
 
@@ -37,14 +26,14 @@ $result=mysql_query("SET time_zone='+4:00';",$link) or die(mysql_errno($link).my
 	<tr class="main">
 		<td>
 			<form action="put_to_tbl.php" method="post">
-				Date: <input type="text" name="op_date" class="date_input" /> 
+				Date: <input type="text" name="op_date" value="<?php echo date("j m Y")?>" class="date_input" /> 
 				Summ: <input type="text" name="op_summ" /> </br>
 				Comments: <textarea rows=3 cols=50 name="op_comm"> </textarea> </br>
 				Group: 
 					<select size=1 name="op_group">
 <?php
 //выберем данные
-	$result=mysql_query("SELECT * FROM ".$table, $link) or die(mysql_errno($link).mysql_error($link));
+	$result=mysql_query("SELECT * FROM dir_pr", $link) or die(mysql_errno($link).mysql_error($link));
 //выведем результаты в HTML-документ
 
 	while($data_pr=mysql_fetch_row($result)) {
@@ -60,23 +49,28 @@ $result=mysql_query("SET time_zone='+4:00';",$link) or die(mysql_errno($link).my
 <?php
 	echo "Таблица операций за сегодняшний день ".date("d.m.Y")." : </br>";
 ?>
+			<form action="delete_pack_op.php" method="post">
 			<table class="info">
 <!--заголовки -->
 				<tr>
 					<th class='info'> Сумма </br> операции</th>
 					<th class='info'> Комментарии</th>
-					<th class='info'> группа операции</th>
+					<th class='info'> Группа операции</th>
+					<th class='info'> </th>
 				</tr>
  <?php
-	$result=mysql_query("select a.op_date,a.op_summ,a.comment,b.priznak_text 
+	$result=mysql_query("select a.op_summ,a.comment,b.priznak_text,a.n_op 
 						from main_history as a INNER JOIN dir_pr as b
 							on a.priznak=b.priznak
-						where a.op_date = curdate()",$link) or die(mysql_errno($link)." ".mysql_error($link));
+						where (a.op_date = curdate()) and a.priznak <> 0",$link) or die(mysql_errno($link)." ".mysql_error($link));
 		while ($oper=mysql_fetch_row($result)) {
-			echo "<tr><td class='info'>".$oper[1]."</td><td class='info'>".$oper[2]."</td><td class='info'>".$oper[3]."</td></tr>";
+			echo "<tr><td class='info'>".$oper[0]."</td><td class='info'>".$oper[1]."</td><td class='info'>".$oper[2]."</td>
+			<td> <input type='checkbox' name='".$oper[3]."'/></td></tr>";
 		}
  ?>
 			</table>
+			<input type="submit" value="удалить отмеченные"/>
+			</form>
 		</td>
 		<td>
 			Таблица остатков за текущий месяц: </br>
@@ -104,11 +98,12 @@ $result=mysql_query("SET time_zone='+4:00';",$link) or die(mysql_errno($link).my
 		<td> <!-- Форма вывода операций-->
 			<form action="show_history.php" method="post"> 
 				Показать все операции за указннный интервал: </br>
-				от <input type="text" name="s_op_date" class="date_input"/> до <input type="text" name="f_op_date" class="date_input"/> </br> 
+				от <input type="text" name="s_op_date" value="1 <?php echo date("m Y") ?>" class = "date_input"/> 
+				до <input type="text" name="f_op_date" value="<?php echo date("j m Y")?>" class = "date_input"/> </br> 
 				по группам:
 					<select name="op_group[]" multiple size="6"> 
 <?php  
-	$result=mysql_query("SELECT * FROM ".$table, $link) or die(mysql_errno($link).mysql_error($link));
+	$result=mysql_query("SELECT * FROM dir_pr", $link) or die(mysql_errno($link).mysql_error($link));
 	//выведем результаты в HTML-документ
 	$exclde_array = array('16','17');
 	while($data_pr=mysql_fetch_row($result)) {
@@ -123,7 +118,8 @@ $result=mysql_query("SET time_zone='+4:00';",$link) or die(mysql_errno($link).my
 		<td>  <!-- Форма вывода остатков-->
 			<form action="show_rests.php" method="post"> 
 				Показать все изменения остатка за указннный интервал: </br>
-				от <input type="text" name="s_op_date" class="date_input"/> до <input type="text" name="f_op_date" class="date_input"/> </br> 
+				от <input type="text" name="s_op_date" value="1 <?php echo date("m Y") ?>" class="date_input"/>
+				до <input type="text" name="f_op_date" value="<?php echo date("j m Y")?>" class="date_input"/> </br> 
 				<input type="submit" value="Показать" />
 			</form>
 		</td>
