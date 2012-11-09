@@ -15,9 +15,11 @@
 <?php
 $link;
 putenv("TZ=Europe/Moscow");
-//-----------------------------> Connect on DB
+$bdhost; $bdname; $bduser; $bdpass;
+include 'bdpass.php';
 include 'function_lib.php';
-connect_to_db('lut_fin', 'mysql.lutrim.com', 'fin_root', 'fin_prog');
+//-----------------------------> Connect on DB
+connect_to_db($bdname, $bdhost, $bduser, $bdpass);
 ?>
 
 <TABLE class="main">

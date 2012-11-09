@@ -14,10 +14,12 @@
 <BODY>
 <?php
 $link;
+$bdhost; $bdname; $bduser; $bdpass;
+include 'bdpass.php';
 include 'function_lib.php';
 putenv("TZ=Europe/Moscow");
 //-----------------------------> Connect on DB
-connect_to_db('lut_fin', 'mysql.lutrim.com', 'fin_root', 'fin_prog');
+connect_to_db($bdname, $bdhost, $bduser, $bdpass);
 ?>
 <TABLE class="main">
 
