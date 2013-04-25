@@ -1,4 +1,4 @@
-﻿<?php 
+<?php 
 $link;
 putenv("TZ=Europe/Moscow");
 $bdhost; $bdname; $bduser; $bdpass;
@@ -19,17 +19,17 @@ connect_to_db($bdname, $bdhost, $bduser, $bdpass);
 //	$POST_to_delete = array("op_date" => "29 10 2012", "op_summ" => "-900", "op_comm" => "del ".$delete_array[0], "op_group" => "0");
 
 	foreach ($_POST as $key => $value) {
-		$result=mysql_query("select DATE_FORMAT(op_date,'%e %m %Y'), op_summ from main_history where n_op=".$key, $link) 
-			or die(mysql_errno($link)." ".mysql_error($link));
-		$op_to_delete=mysql_fetch_row($result);
+		$result=mysqli_query($link,"select DATE_FORMAT(op_date,'%e %m %Y'), op_summ from main_history where n_op=".$key) 
+			or die(mysqli_errno($link)." : ".mysqli_error($link));
+		$op_to_delete=mysqli_fetch_row($result);
 //		print_r($result); echo " </br>";
 		
 		$POST_to_delete = array("op_date" => $op_to_delete[0], "op_summ" => ((-1)*$op_to_delete[1]), "op_comm" => "del ".$key, "op_group" => "0");
 //		print_r($POST_to_delete); echo " </br>";
 		add_operation($POST_to_delete);
-		$result=mysql_query("UPDATE main_history set priznak=0 where n_op = ".$key,$link) or die(mysql_errno($link)." ".mysql_error($link));
+		$result=mysqli_query($link,"UPDATE main_history set priznak=0 where n_op = ".$key) or die(mysqli_errno($link)." : ".mysqli_error($link));
 	}	
-mysql_close($link);
+mysqli_close($link);
 header('Location: '.$_SERVER["HTTP_REFERER"]);
 
 ?>

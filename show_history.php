@@ -3,7 +3,6 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <title>История операций.</title>
-	<link rel="stylesheet" href="style.css" type="text/css"/>
 	<!-- Bootstrap -->
 	<link href="Tools/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
 	<!-- addons bootstrap-->
@@ -12,11 +11,13 @@
 	<script src="http://code.jquery.com/jquery-latest.js"></script>
 	<script src="Tools/bootstrap/js/bootstrap.min.js"></script>	
 	<script src="Tools/datepicker/js/bootstrap-datepicker.js"></script>
+	<script charset="UTF-8" src="Tools/datepicker/js/locales/bootstrap-datepicker.ru.js"></script>
 	<script src="Tools/bootstrap-select/bootstrap-select.min.js"></script>
 <!-- добавляем оверстайл, для изменения некоторых стилей bootstrap -->    
 	<style>
     	body { background: #fcf8e3; }
 		.table-nonfluid { width: auto; }
+		.lut_header{background: #CDCDCD;}
 		.bootstrap-select {float: left !important;}
 	</style>	
 </head>
@@ -47,23 +48,51 @@ connect_to_db($bdname, $bdhost, $bduser, $bdpass);
 		<label>фильтровать по указанным группам:</label>
 			<div class="control-group">
 				<div class="controls controls-row">
-					<select class="selectpicker span2" name="op_group[]" multiple data-selected-text-format="count>2" data-size="6">
-						<?php  
-							$result=mysql_query("SELECT * FROM dir_pr", $link) or die(mysql_errno($link).mysql_error($link));
-							while($data_pr=mysql_fetch_row($result)) {
-		//					echo "data_pr ->> ".$data_pr[0]." op_group ->> "; print_r($_POST["op_group"]); echo " </br>";
-								if (in_array($data_pr[0],$_POST["op_group"])) {
-									echo "<option selected value=".$data_pr[0].">".$data_pr[1]."</option>";}
-									else {echo "<option value=".$data_pr[0].">".$data_pr[1]."</option>";};
-							}
+					<select class="selectpicker span2 history-view" name="op_group[]" multiple data-selected-text-format="count>2" data-size="6">
+						<?php 
+							//выберем данные для статьи расхода
+							echo "<optgroup label='Расход'>";
+							$result=mysqli_query($link,"SELECT * FROM dir_pr where priznak < 0") or die(mysqli_errno($link)." : ".mysqli_error($link));
+							//выведем результаты в HTML-документ
+								while($data_pr=mysqli_fetch_row($result)) {
+									if (in_array($data_pr[0],$_POST["op_group"])) {
+										echo "<option selected value=".$data_pr[0].">".$data_pr[1]."</option>";}
+										else {echo "<option value=".$data_pr[0].">".$data_pr[1]."</option>";};
+
+//	echo "<option selected value=",$data_pr[0],">",$data_pr[1]."</option>";
+								}
+							echo "</optgroup>";
+							//выберем данные для статьи Прихода
+							echo "<optgroup label='Приход'>";
+							$result=mysqli_query($link,"SELECT * FROM dir_pr where priznak > 0") or die(mysqli_errno($link)." : ".mysqli_error($link));
+							//выведем результаты в HTML-документ
+								while($data_pr=mysqli_fetch_row($result)) {
+									if (in_array($data_pr[0],$_POST["op_group"])) {
+										echo "<option selected value=".$data_pr[0].">".$data_pr[1]."</option>";}
+										else {echo "<option value=".$data_pr[0].">".$data_pr[1]."</option>";};
+//									echo "<option value=",$data_pr[0],">",$data_pr[1]."</option>";
+								}
+							echo "</optgroup>";
+						
+							//$result=mysqli_query($link,"SELECT * FROM dir_pr") or die(mysqli_errno($link)." : ".mysqli_error($link));
+							//while($data_pr=mysqli_fetch_row($result)) {
+		//					//echo "data_pr ->> ".$data_pr[0]." op_group ->> "; print_r($_POST["op_group"]); echo " </br>";
+							//	if (in_array($data_pr[0],$_POST["op_group"])) {
+							//		echo "<option selected value=".$data_pr[0].">".$data_pr[1]."</option>";}
+							//		else {echo "<option value=".$data_pr[0].">".$data_pr[1]."</option>";};
+							//}
 						?>	 			
 					</select>
 					<button class="btn span2" type="submit">Показать</button>
+				</div>
+				<div class="controls controls-row">
+					<a href="#" class="btn btn-mini history-select">выбрать все</a> <a href="#" class="btn btn-mini history-deselect">снять выделение</a>
 				</div>
 			</div>
 	</form>
 </TD></TR>
 <TR><TD>
+<a class="btn" href=index.php> Вернуться на главную страницу</a></br></br>
 <?php
 //блок преобразования дат в удобоваримый для php & mysql
 $s_date_invers=inverse_date($_POST["s_op_date"]);
@@ -115,7 +144,7 @@ if ($flag_null == 0) {
 	<form action="delete_pack_op.php" method="post">
 		<table class="table table-bordered table-condensed table-hover table-nonfluid">
 		<!--заголовки -->
-			<thead>
+			<thead class="lut_header">
 				<tr>
 					<th> Дата </br> операции</th>
 					<th> Сумма </br> операции</th>
@@ -128,39 +157,39 @@ if ($flag_null == 0) {
 		<?php
 		switch ($flag_null) {
 			case 0:
-				$result=mysql_query("select DATE_FORMAT(a.op_date,'%d-%m-%Y') as op_date,a.op_summ,a.comment,b.priznak_text,a.n_op 
+				$result=mysqli_query($link,"select DATE_FORMAT(a.op_date,'%d-%m-%Y') as op_date,a.op_summ,a.comment,b.priznak_text,a.n_op 
 										from main_history as a INNER JOIN dir_pr as b
 											on a.priznak=b.priznak
 										where (a.op_date between '".$s_date_invers."' and '".$f_date_invers."') and 
-										(a.priznak in ('".implode("','",$_POST["op_group"])."')) order by a.op_date ASC",$link) 
-										or die(mysql_errno($link)." ".mysql_error($link));
+										(a.priznak in ('".implode("','",$_POST["op_group"])."')) order by a.op_date ASC") 
+										or die(mysqli_errno($link)." : ".mysqli_error($link));
 				break;
 			case 1:
-				$result=mysql_query("select DATE_FORMAT(a.op_date,'%d-%m-%Y') as op_date,a.op_summ,a.comment,b.priznak_text,a.n_op 
+				$result=mysqli_query($link,"select DATE_FORMAT(a.op_date,'%d-%m-%Y') as op_date,a.op_summ,a.comment,b.priznak_text,a.n_op 
 										from main_history as a INNER JOIN dir_pr as b
 											on a.priznak=b.priznak
 										where (a.op_date <= '".$f_date_invers."') and 
-										(a.priznak in ('".implode("','",$_POST["op_group"])."')) order by a.op_date ASC",$link) 
-										or die(mysql_errno($link)." ".mysql_error($link));
+										(a.priznak in ('".implode("','",$_POST["op_group"])."')) order by a.op_date ASC") 
+										or die(mysqli_errno($link)." : ".mysqli_error($link));
 				break;
 			case 2:
-				$result=mysql_query("select DATE_FORMAT(a.op_date,'%d-%m-%Y') as op_date,a.op_summ,a.comment,b.priznak_text,a.n_op 
+				$result=mysqli_query($link,"select DATE_FORMAT(a.op_date,'%d-%m-%Y') as op_date,a.op_summ,a.comment,b.priznak_text,a.n_op 
 										from main_history as a INNER JOIN dir_pr as b
 											on a.priznak=b.priznak
 										where (a.op_date >= '".$s_date_invers."') and 
-										(a.priznak in ('".implode("','",$_POST["op_group"])."')) order by a.op_date ASC",$link) 
-										or die(mysql_errno($link)." ".mysql_error($link));
+										(a.priznak in ('".implode("','",$_POST["op_group"])."')) order by a.op_date ASC") 
+										or die(mysqli_errno($link)." : ".mysqli_error($link));
 				break;
 			case 3:
-				$result=mysql_query("select DATE_FORMAT(a.op_date,'%d-%m-%Y') as op_date,a.op_summ,a.comment,b.priznak_text,a.n_op 
+				$result=mysql_query($link,"select DATE_FORMAT(a.op_date,'%d-%m-%Y') as op_date,a.op_summ,a.comment,b.priznak_text,a.n_op 
 										from main_history as a INNER JOIN dir_pr as b
 											on a.priznak=b.priznak
-										where (a.priznak in ('".implode("','",$_POST["op_group"])."')) order by a.op_date ASC",$link) 
-										or die(mysql_errno($link)." ".mysql_error($link));
+										where (a.priznak in ('".implode("','",$_POST["op_group"])."')) order by a.op_date ASC") 
+										or die(mysqli_errno($link)." : ".mysqli_error($link));
 				break;
 		}
 		$total=0.0;
-		while ($oper=mysql_fetch_row($result)) {
+		while ($oper=mysqli_fetch_row($result)) {
 			echo "<tr class='info'><td>".$oper[0]."</td><td>".$oper[1]."</td><td>".$oper[2]."</td><td>".$oper[3]."</td>
 					<td><label class='checkbox'><input type='checkbox' name='".$oper[4]."'/></label></td></tr>";
 			$total += $oper[1];
@@ -177,14 +206,25 @@ if ($flag_null == 0) {
 	</form>
 
 
-<?php mysql_close($link); ?>
+<?php mysqli_close($link); ?>
 </TD></TR>
 
 <script> 
 $('.datepicker').datepicker({
-    format: 'd mm yyyy'
+	format: "d mm yyyy",
+	weekStart: 1,
+	language: "ru",
+	autoclose: true,
+	todayBtn: "linked",
+	todayHighlight: true
 });
 $('.selectpicker').selectpicker();
+$('.history-select').click(function() {
+	$('.history-view').selectpicker('selectAll');
+});
+$('.history-deselect').click(function() {
+	$('.history-view').selectpicker('deselectAll');
+});
 </script>
 
 </TABLE>

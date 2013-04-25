@@ -7,10 +7,10 @@ include 'function_lib.php';
 //-----------------------------> Connect on DB
 connect_to_db($bdname, $bdhost, $bduser, $bdpass);
 
-//Ïðîâåðêà ïðàâèëüíîñòè ââîäà
+//ÐŸÑ€Ð¾Ð²ÐµÑ€ÐºÐ° Ð¿Ñ€Ð°Ð²Ð¸Ð»ÑŒÐ½Ð¾ÑÑ‚Ð¸ Ð²Ð²Ð¾Ð´Ð°
 
 add_operation($_POST);
-mysql_close($link);
+mysqli_close($link);
 header('Location: index.php');
 
 ?>
