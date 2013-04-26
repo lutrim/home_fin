@@ -19,7 +19,7 @@
 		.table-nonfluid { width: auto; }
 		.lut_header{background: #CDCDCD;}
 		.bootstrap-select {float: left !important;}
-	</style>	
+	</style>
 </head>
 <BODY>
 <?php
@@ -46,53 +46,59 @@ connect_to_db($bdname, $bdhost, $bduser, $bdpass);
 			</div>
 		</div>
 		<label>фильтровать по указанным группам:</label>
-			<div class="control-group">
-				<div class="controls controls-row">
-					<select class="selectpicker span2 history-view" name="op_group[]" multiple data-selected-text-format="count>2" data-size="6">
-						<?php 
-							//выберем данные для статьи расхода
-							echo "<optgroup label='Расход'>";
-							$result=mysqli_query($link,"SELECT * FROM dir_pr where priznak < 0") or die(mysqli_errno($link)." : ".mysqli_error($link));
-							//выведем результаты в HTML-документ
-								while($data_pr=mysqli_fetch_row($result)) {
-									if (in_array($data_pr[0],$_POST["op_group"])) {
-										echo "<option selected value=".$data_pr[0].">".$data_pr[1]."</option>";}
-										else {echo "<option value=".$data_pr[0].">".$data_pr[1]."</option>";};
-
-//	echo "<option selected value=",$data_pr[0],">",$data_pr[1]."</option>";
-								}
-							echo "</optgroup>";
-							//выберем данные для статьи Прихода
-							echo "<optgroup label='Приход'>";
-							$result=mysqli_query($link,"SELECT * FROM dir_pr where priznak > 0") or die(mysqli_errno($link)." : ".mysqli_error($link));
-							//выведем результаты в HTML-документ
-								while($data_pr=mysqli_fetch_row($result)) {
-									if (in_array($data_pr[0],$_POST["op_group"])) {
-										echo "<option selected value=".$data_pr[0].">".$data_pr[1]."</option>";}
-										else {echo "<option value=".$data_pr[0].">".$data_pr[1]."</option>";};
-//									echo "<option value=",$data_pr[0],">",$data_pr[1]."</option>";
-								}
-							echo "</optgroup>";
-						
-							//$result=mysqli_query($link,"SELECT * FROM dir_pr") or die(mysqli_errno($link)." : ".mysqli_error($link));
-							//while($data_pr=mysqli_fetch_row($result)) {
-		//					//echo "data_pr ->> ".$data_pr[0]." op_group ->> "; print_r($_POST["op_group"]); echo " </br>";
-							//	if (in_array($data_pr[0],$_POST["op_group"])) {
-							//		echo "<option selected value=".$data_pr[0].">".$data_pr[1]."</option>";}
-							//		else {echo "<option value=".$data_pr[0].">".$data_pr[1]."</option>";};
-							//}
-						?>	 			
-					</select>
-					<button class="btn span2" type="submit">Показать</button>
-				</div>
-				<div class="controls controls-row">
-					<a href="#" class="btn btn-mini history-select">выбрать все</a> <a href="#" class="btn btn-mini history-deselect">снять выделение</a>
-				</div>
+		<div class="control-group">
+			<div class="controls controls-row">
+				<select class="selectpicker span2 history-view" name="op_group[]" multiple data-selected-text-format="count>2" data-size="6">
+					<?php 
+						//выберем данные для статьи расхода
+						echo "<optgroup label='Расход'>";
+						$result=mysqli_query($link,"SELECT * FROM dir_pr where priznak < 0") or die(mysqli_errno($link)." : ".mysqli_error($link));
+						//выведем результаты в HTML-документ
+							while($data_pr=mysqli_fetch_row($result)) {
+								if (in_array($data_pr[0],$_POST["op_group"])) {
+									echo "<option selected value=".$data_pr[0].">".$data_pr[1]."</option>";}
+									else {echo "<option value=".$data_pr[0].">".$data_pr[1]."</option>";};
+							}
+						echo "</optgroup>";
+						//выберем данные для статьи Прихода
+						echo "<optgroup label='Приход'>";
+						$result=mysqli_query($link,"SELECT * FROM dir_pr where priznak > 0") or die(mysqli_errno($link)." : ".mysqli_error($link));
+						//выведем результаты в HTML-документ
+							while($data_pr=mysqli_fetch_row($result)) {
+								if (in_array($data_pr[0],$_POST["op_group"])) {
+									echo "<option selected value=".$data_pr[0].">".$data_pr[1]."</option>";}
+									else {echo "<option value=".$data_pr[0].">".$data_pr[1]."</option>";};
+							}
+						echo "</optgroup>";
+					?>	 			
+				</select>
+				<button class="btn btn-primary span2" type="submit">Показать</button>				
 			</div>
+			<div class="controls">
+				<a href="#" class="btn btn-mini history-select">выбрать все</a> <a href="#" class="btn btn-mini history-deselect">снять выделение</a>
+			</div>
+		</div>
 	</form>
 </TD></TR>
 <TR><TD>
-<a class="btn" href=index.php> Вернуться на главную страницу</a></br></br>
+<script>
+$('.datepicker').datepicker({
+	format: "d mm yyyy",
+	weekStart: 1,
+	language: "ru",
+	autoclose: true,
+	todayBtn: "linked",
+	todayHighlight: true
+});
+
+$('.selectpicker').selectpicker();
+$('.history-select').click(function() {
+	$('.history-view').selectpicker('selectAll');
+});
+$('.history-deselect').click(function() {
+	$('.history-view').selectpicker('deselectAll');
+});	
+</script>
 <?php
 //блок преобразования дат в удобоваримый для php & mysql
 $s_date_invers=inverse_date($_POST["s_op_date"]);
@@ -108,7 +114,7 @@ if ($_POST["s_op_date"] == "") { $flag_null=1;}
 	$data=date_create($s_date_invers);
 		if (!$data) {
 			echo "Дата начала интервала введена неверно. Еще раз? </br>";
-			echo "<a href=index.php> Вернуться на главную страницу</a>";
+			echo "<a class='btn btn-info' href='index.php'> Вернуться на главную страницу</a>";
 			die;
 		};
 	}
@@ -117,7 +123,7 @@ if ($_POST["f_op_date"] == "") { $flag_null += 2;}
 	$data=date_create($f_date_invers);
 		if (!$data) {
 			echo "Дата конца интервала введена неверно. Еще раз? </br>";
-			echo "<a href=index.php> Вернуться на главную страницу</a>";
+			echo "<a class='btn btn-info' href='index.php'> Вернуться на главную страницу</a>";
 			die;
 		};
 	}	
@@ -125,17 +131,25 @@ if ($_POST["f_op_date"] == "") { $flag_null += 2;}
 if ($flag_null == 0) {
 	if (date_create($f_date_invers) < date_create($s_date_invers)) {
 		echo "Дата окончания интервала  меньше даты начала интервала, внимательнее надо быть. Введи еще раз параметры </br>";
-		echo "<a href=index.php> Вернуться на главную страницу</a>";
+		echo "<a class='btn btn-info' href='index.php'> Вернуться на главную страницу</a>";
 		die;
 	};
 }
+
+//проверка на присутствие выбранных групп
+if (empty($_POST["op_group"])){
+	echo "Не выбрана ни одна из групп операция для отображения Введи еще раз параметры </br>";
+	echo "<a class='btn btn-info' href='index.php'> Вернуться на главную страницу</a>";
+	die;
+}
+
 //блок проверок завершен
  
 //$date_invers = Date_create($_POST["s_op_date"]);
 //echo $date_invers->format('Y-m-d H:i:s')." create ".$s_date_invers; die;
 
 ?>
-
+<a class="btn btn-info" href="index.php"> Вернуться на главную страницу</a></br></br>
 <?php 
 	/*echo "select sum(op_summ) from main_history 
 							where (op_date between '".$s_date_invers."' and '".$f_date_invers."') 
@@ -208,26 +222,7 @@ if ($flag_null == 0) {
 
 <?php mysqli_close($link); ?>
 </TD></TR>
-
-<script> 
-$('.datepicker').datepicker({
-	format: "d mm yyyy",
-	weekStart: 1,
-	language: "ru",
-	autoclose: true,
-	todayBtn: "linked",
-	todayHighlight: true
-});
-$('.selectpicker').selectpicker();
-$('.history-select').click(function() {
-	$('.history-view').selectpicker('selectAll');
-});
-$('.history-deselect').click(function() {
-	$('.history-view').selectpicker('deselectAll');
-});
-</script>
-
 </TABLE>
-	<a class="btn" href=index.php> Вернуться на главную страницу</a></br></br></br>
+	<a class="btn btn-info" href="index.php"> Вернуться на главную страницу</a></br></br></br>
 </BODY>
 </html>

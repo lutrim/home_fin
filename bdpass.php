@@ -1,9 +1,9 @@
 <?php
 
 global $bdhost, $bdname, $bduser, $bdpass;
-$bdhost = 'MYSQL SERVER';
-$bdname = 'BD_MANE';
-$bduser = 'USER';
-$bdpass = 'PASS';
+$bdhost = 'mysql.lutrim.com'; 
+$bdname = 'lut_fin_test'; 
+$bduser = 'fin_root'; 
+$bdpass = 'fin_prog';
 
 ?>

@@ -134,7 +134,7 @@ connect_to_db($bdname, $bdhost, $bduser, $bdpass);
 				</div>
 				<div class="control-group">
 					<div class="controls">
-						<button type="submit" class="btn">Сохранить</button>
+						<button type="submit" class="btn btn-primary">Сохранить</button>
 					</div>
 				</div>
 			</form>
@@ -163,7 +163,7 @@ connect_to_db($bdname, $bdhost, $bduser, $bdpass);
 								}
 						?>
 					</table>
-					<button type="submit" class="btn">удалить отмеченные</button>
+					<button type="submit" class="btn btn-danger">удалить отмеченные</button>
 				</form>
 			</div>
 		</div>
@@ -213,13 +213,13 @@ connect_to_db($bdname, $bdhost, $bduser, $bdpass);
 									?>	   
 								</select>
 							</div>	
-							<div class="controls comtrols-row">
+							<div class="controls controls-row">
 								<a href="#" class="btn btn-mini history-select">выбрать все</a> <a href="#" class="btn btn-mini history-deselect">снять выделение</a>
 							</div>
 					</div>
 					<div class="control-group">
 						<div class="controls">
-							<button type="submit" class="btn" >Показать</button>
+							<button type="submit" class="btn btn-primary" >Показать</button>
 						</div>
 					</div>
 				</form>
@@ -236,7 +236,7 @@ connect_to_db($bdname, $bdhost, $bduser, $bdpass);
 				</div>
 				<div class="control-group">
 					<div class="controls">
-						<button class="btn" type="button" 
+						<button class="btn btn-primary" type="button" 
 							onclick="loadXMLDoc(r_get_url('ajax_rests.php','begin_rest_interval_date','end_rest_interval_date'),'rests_table')"> 
 								Показать 
 						</button>
@@ -249,7 +249,7 @@ connect_to_db($bdname, $bdhost, $bduser, $bdpass);
 <!-- Таблица остатков -->
 	<div class="span3">
 		<table class="table table-condensed table-bordered" id="rests_table">
-		<caption>Таблица остатков за текущий месяц:</caption>
+		<caption>Таблица остатков за 15 дней:</caption>
 			<!--заголовки -->
 			<tr class="lut_header">
 				<th > Дата</th>
@@ -257,7 +257,7 @@ connect_to_db($bdname, $bdhost, $bduser, $bdpass);
 			</tr>
 			<?php
 				$result=mysqli_query($link,"select DATE_FORMAT(r_date,'%d-%m-%Y'),rest_summ from rests  
-					where r_date >= (curdate()-15) 
+					where r_date >= DATE_SUB(CURDATE(), INTERVAL 15 DAY) 
 					order by r_date") or die(mysqli_errno($link)." : ".mysqli_error($link));
 					while ($rests=mysqli_fetch_row($result)) {
 						echo "<tr class='info'><td >".$rests[0]."</td><td >".$rests[1]."</td></tr>";
