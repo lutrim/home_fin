@@ -78,7 +78,7 @@ connect_to_db($bdname, $bdhost, $bduser, $bdpass);
 				<div class="control-group">
 					<label class="control-label" for="inputDate">Дата:</label>
 						<div class="controls">
-							<input class = "datepicker input-small" id="inputDate" type="text" name="op_date" value="<?php echo date("j m Y")?>" />
+							<input class = "datepicker input-small" id="inputDate" type="text" name="op_date" value="<?php echo date("j m Y")?>"/>
 						</div>
 				</div>
 				<div class="control-group">
@@ -109,7 +109,7 @@ connect_to_db($bdname, $bdhost, $bduser, $bdpass);
 				<div class="control-group">
 						<label class="control-label" for="inputSumm">Сумма:</label>
 						<div class="controls">
-							<input class = "input-medium" id="inputSumm" type="text" name="op_summ" />
+							<span class="add-on" id="input-summ-sign"><i class="icon-minus"></i></span><input class = "input-medium" id="inputSumm" type="text" name="op_summ" />
 						</div>
 				</div>
 				<div class="control-group">
@@ -156,7 +156,8 @@ connect_to_db($bdname, $bdhost, $bduser, $bdpass);
 							$result=mysqli_query($link,"select a.op_summ,a.comment,b.priznak_text,a.n_op 
 								from main_history as a INNER JOIN dir_pr as b
 								on a.priznak=b.priznak
-								where (a.op_date = curdate()) and a.priznak <> 0") or die(mysqli_errno($link)." : ".mysqli_error($link));
+								where (a.op_date = curdate()) and a.priznak <> 0
+								order by a.n_op") or die(mysqli_errno($link)." : ".mysqli_error($link));
 								while ($oper=mysqli_fetch_row($result)) {
 									echo 	"<tr class='info'><td>".$oper[0]."</td><td>".$oper[1]."</td><td>".$oper[2]."</td>
 											<td> <input type='checkbox' name='".$oper[3]."'/></td></tr>";
@@ -284,6 +285,14 @@ $('.history-deselect').click(function() {
 });
 
 $('#inputGroup').tooltip({'trigger':'focus', 'placement':'right', 'title': 'Заполнять только если надо добавить новую группу'});
+
+$('#ChooseGroup').change(function() {
+	if (document.getElementById("ChooseGroup").value > 0) 
+		{document.getElementById("input-summ-sign").innerHTML="<i class='icon-plus'></i>"}
+		else 
+			{document.getElementById("input-summ-sign").innerHTML="<i class='icon-minus'></i>"};
+});
+
 </script>
 </DIV>
 <?php mysqli_close($link); ?>

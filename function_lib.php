@@ -32,6 +32,10 @@ FUNCTION add_operation($int_POST)
 //преобразуем дату в удобоваримый формат YYYY-MM-DD
 $date_invers=inverse_date($int_POST["op_date"]);
 
+//определяем знак операции нулевая группа (удаление) или приход/расход 
+if ($int_POST["op_group"] == 0) {}
+	elseif ($int_POST["op_group"] > 0) { $int_POST["op_summ"] = abs($int_POST["op_summ"]);}
+		else {$int_POST["op_summ"] = -1 * abs($int_POST["op_summ"]);};
 //вставим данные в таблицы истории.
 //если поле новой группы пустое, вставляем как обычно
 	if ($int_POST["new_group"]=="") {
