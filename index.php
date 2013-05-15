@@ -123,12 +123,12 @@ connect_to_db($bdname, $bdhost, $bduser, $bdpass);
 					<div class="controls">
 						<input id="inputGroup" type="text" name="new_group"/>
 					</div>
-					<div class="controls">
+					<div class="controls div-new-group-radio">
 						<label class="radio inline">
-							<input type="radio" name="new-group-radio" id="new-group-radio-credit" checked> Расход
+							<input type="radio" name="new-group-radio" value="credit" checked> Расход
 						</label>
 						<label class="radio inline">
-							<input type="radio" name="new-group-radio" id="new-group-radio-debet"> Приход
+							<input type="radio" name="new-group-radio" value="debet"> Приход
 						</label>
 					</div>
 				</div>
@@ -184,8 +184,9 @@ connect_to_db($bdname, $bdhost, $bduser, $bdpass);
 					</div>			
 					<div class="control-group">
 						<label class="control-label" for="history_groups">по группам</label>
-							<div class="controls">						
-								<select class="selectpicker history-view" name="op_group[]" multiple data-selected-text-format="count>2" data-size="6"> 
+							<div class="controls controls-row">
+								<a href="#" class="span1 history-select"><i class="icon-ok"></i></a> <a href="#" class="span1 history-deselect"><i class="icon-remove"></i></a>							
+								<select class="span10 selectpicker history-view" name="op_group[]" multiple data-selected-text-format="count>2" data-size="6"> 
 									<?php 
 										//выберем данные для статьи расхода
 										echo "<optgroup label='Расход'>";
@@ -203,20 +204,9 @@ connect_to_db($bdname, $bdhost, $bduser, $bdpass);
 												echo "<option value=",$data_pr[0],">",$data_pr[1]."</option>";
 											}
 										echo "</optgroup>";
-									
-										//$result=mysqli_query($link,"SELECT * FROM dir_pr") or die(mysqli_errno($link)." : ".mysqli_error($link));
-										////выведем результаты в HTML-документ
-										//$exclde_array = array('16','17');
-										//	while($data_pr=mysqli_fetch_row($result)) {
-										//		if (!in_array($data_pr[0],$exclde_array)) {echo "<option selected value=".$data_pr[0].">".$data_pr[1]."</option>";}
-										//			else {echo "<option value=".$data_pr[0].">".$data_pr[1]."</option>";};
-										//	}
 									?>	   
 								</select>
 							</div>	
-							<div class="controls controls-row">
-								<a href="#" class="btn btn-mini history-select">выбрать все</a> <a href="#" class="btn btn-mini history-deselect">снять выделение</a>
-							</div>
 					</div>
 					<div class="control-group">
 						<div class="controls">
@@ -284,13 +274,24 @@ $('.history-deselect').click(function() {
 	$('.history-view').selectpicker('deselectAll');
 });
 
+$('.history-select').tooltip({'trigger':'hover', 'placement':'top', 'title': 'Выделить все'});
+$('.history-deselect').tooltip({'trigger':'hover', 'placement':'top', 'title': 'Снять выделение'});
+
 $('#inputGroup').tooltip({'trigger':'focus', 'placement':'right', 'title': 'Заполнять только если надо добавить новую группу'});
 
 $('#ChooseGroup').change(function() {
-	if (document.getElementById("ChooseGroup").value > 0) 
-		{document.getElementById("input-summ-sign").innerHTML="<i class='icon-plus'></i>"}
+	if (this.value > 0) 
+		{$("#input-summ-sign").html("<i class='icon-plus'></i>")}
 		else 
-			{document.getElementById("input-summ-sign").innerHTML="<i class='icon-minus'></i>"};
+			{$("#input-summ-sign").html("<i class='icon-minus'></i>")};
+});
+//input[name=new-group-radio]
+//.div-new-group-radio
+$('input[name=new-group-radio]').change(function() {
+	if ($('input:radio[name=new-group-radio]:checked').val() == "debet")
+		{$("#input-summ-sign").html("<i class='icon-plus'></i>")}
+		else 
+			{$("#input-summ-sign").html("<i class='icon-minus'></i>")};
 });
 
 </script>

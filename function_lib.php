@@ -32,27 +32,37 @@ FUNCTION add_operation($int_POST)
 //преобразуем дату в удобоваримый формат YYYY-MM-DD
 $date_invers=inverse_date($int_POST["op_date"]);
 
-//определяем знак операции нулевая группа (удаление) или приход/расход 
-if ($int_POST["op_group"] == 0) {}
-	elseif ($int_POST["op_group"] > 0) { $int_POST["op_summ"] = abs($int_POST["op_summ"]);}
-		else {$int_POST["op_summ"] = -1 * abs($int_POST["op_summ"]);};
+
 //вставим данные в таблицы истории.
 //если поле новой группы пустое, вставляем как обычно
 	if ($int_POST["new_group"]=="") {
 		//echo "popal null";
+		//определяем знак операции, нулевая группа (удаление)
+		if ($int_POST["op_group"] == 0) {}
+			elseif ($int_POST["op_group"] > 0) { $int_POST["op_summ"] = abs($int_POST["op_summ"]);}
+				else {$int_POST["op_summ"] = -1 * abs($int_POST["op_summ"]);};
+		//всталяем данные
 		mysqli_query($link,"INSERT INTO main_history (n_op, op_date, op_summ, comment, priznak)
 		VALUES (NULL, '".$date_invers."' , '".$int_POST["op_summ"]."', '".$int_POST["op_comm"]."', '".$int_POST["op_group"]."')") 
 		or die(mysqli_errno($link)." : ".mysqli_error($link));
 	} 
 		else { //если поле непустое, сначала вставим новую строку в справочник, потом добавим в историю
 			//echo "popal gemor : ".$int_POST["new_group"]." </br>";
+			//определяем знак операции приход/расход (включая проверку знака новой группы)
+			if (strtoupper($int_POST["new-group-radio"]) == strtoupper(debet)) { $int_POST["op_summ"] = abs($int_POST["op_summ"]);}
+				else {$int_POST["op_summ"] = -1 * abs($int_POST["op_summ"]);};
+			
 			//проверим, возможно такая группа уже существует
-			$result=mysqli_query($link,"SELECT priznak from dir_pr where UCASE(priznak_text) = UCASE('".$int_POST["new_group"]."')",$link)
+			$result=mysqli_query($link,"SELECT priznak from dir_pr where UCASE(priznak_text) = UCASE('".$int_POST["new_group"]."')")
 			or die("ошибка ".mysqli_errno($link)." Текст: ".mysqli_error($link));
 			$op_group=mysqli_fetch_row($result);
 			if ($op_group <> "") {$int_POST["op_group"]=$op_group[0]; print_r($int_POST); echo " </br>";} else { //Если такой группы действительно нет, то добавляем
-			mysqli_query($link,"	INSERT INTO dir_pr (priznak, priznak_text)
-							VALUES (NULL,'".$int_POST["new_group"]."')") or die("ошибка ".mysqli_errno($link)." Текст: ".mysqli_error($link));
+			mysqli_query($link,"insert into dir_pr (priznak,priznak_text)
+									select 
+										case
+											when ucase('".$int_POST["new-group-radio"]."') = ucase('credit') then min(priznak)-1
+											when ucase('".$int_POST["new-group-radio"]."') = ucase('debet') then max(priznak)+1
+										end, '".$int_POST["new_group"]."' from dir_pr;") or die("ошибка ".mysqli_errno($link)." Текст: ".mysqli_error($link));
 			}
 			mysqli_query($link,"	INSERT INTO main_history (n_op, op_date, op_summ, comment, priznak)
 							VALUES (NULL, '".$date_invers."' , '".$int_POST["op_summ"]."', '".$int_POST["op_comm"]."', 

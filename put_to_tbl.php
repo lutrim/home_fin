@@ -7,7 +7,10 @@ include 'function_lib.php';
 //-----------------------------> Connect on DB
 connect_to_db($bdname, $bdhost, $bduser, $bdpass);
 
-//Проверка правильности ввода
+//print_r($_POST);
+//echo "</br>";
+//echo $_POST["new-group-radio"];
+//die;
 
 add_operation($_POST);
 mysqli_close($link);

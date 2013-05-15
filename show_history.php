@@ -72,10 +72,10 @@ connect_to_db($bdname, $bdhost, $bduser, $bdpass);
 						echo "</optgroup>";
 					?>	 			
 				</select>
-				<button class="btn btn-primary span2" type="submit">Показать</button>				
+				<a href="#" class="span1 history-select"><i class="icon-ok"></i></a> <a href="#" class="span1 history-deselect"><i class="icon-remove"></i></a>							
 			</div>
 			<div class="controls">
-				<a href="#" class="btn btn-mini history-select">выбрать все</a> <a href="#" class="btn btn-mini history-deselect">снять выделение</a>
+				<button class="btn btn-primary" type="submit">Показать</button>				
 			</div>
 		</div>
 	</form>
@@ -98,6 +98,10 @@ $('.history-select').click(function() {
 $('.history-deselect').click(function() {
 	$('.history-view').selectpicker('deselectAll');
 });	
+
+$('.history-select').tooltip({'trigger':'hover', 'placement':'top', 'title': 'Выделить все'});
+$('.history-deselect').tooltip({'trigger':'hover', 'placement':'top', 'title': 'Снять выделение'});
+
 </script>
 <?php
 //блок преобразования дат в удобоваримый для php & mysql
@@ -208,10 +212,6 @@ if (empty($_POST["op_group"])){
 					<td><label class='checkbox'><input type='checkbox' name='".$oper[4]."'/></label></td></tr>";
 			$total += $oper[1];
 			}
-		/*$result=mysql_query("select sum(op_summ) from main_history 
-								where (op_date between '".$s_date_invers."' and '".$f_date_invers."') and
-								(priznak in ('".implode("','",$_POST["op_group"])."'))",$link) or die(mysql_errno($link)." ".mysql_error($link));
-		$total=mysql_fetch_row($result);*/
 		echo "<tfoot><tr class='info'><th>Итого</th><th colspan='4' align='left'>".$total."</th></tfoot>";
 		?>
 			</tbody>
