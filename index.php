@@ -134,7 +134,7 @@ connect_to_db($bdname, $bdhost, $bduser, $bdpass);
 				</div>
 				<div class="control-group">
 					<div class="controls">
-						<button type="submit" class="btn btn-primary">Сохранить</button>
+						<button type="submit" class="btn btn-primary" id="save-operation" disabled="true">Сохранить</button>
 					</div>
 				</div>
 			</form>
@@ -176,9 +176,7 @@ connect_to_db($bdname, $bdhost, $bduser, $bdpass);
 					<div class="control-group">
 						<label>Показать все операции за указннный интервал:</label>
 							<div class="controls controls-row">
-<!--								<label class="control-label span1" for="start_history_interval">от</label>-->
 								<input class="datepicker input-small span6" id="start_history_interval" type="text" name="s_op_date" value="1 <?php echo date("m Y") ?>" />
-<!--								<label class="control-label span1" for="end_history_interval">до</label>-->
 								<input class="datepicker input-small span6" id="end_history_interval" type="text" name="f_op_date" value="<?php echo date("j m Y")?>" />
 							</div>
 					</div>			
@@ -285,13 +283,31 @@ $('#ChooseGroup').change(function() {
 		else 
 			{$("#input-summ-sign").html("<i class='icon-minus'></i>")};
 });
-//input[name=new-group-radio]
-//.div-new-group-radio
+
 $('input[name=new-group-radio]').change(function() {
 	if ($('input:radio[name=new-group-radio]:checked').val() == "debet")
 		{$("#input-summ-sign").html("<i class='icon-plus'></i>")}
 		else 
 			{$("#input-summ-sign").html("<i class='icon-minus'></i>")};
+});
+
+$('#inputSumm').keyup(function () {
+	
+	var str=$(this).val();
+	
+	if ( /^[0-9]+,[0-9]+$/.test(str) ) {
+		str = str.replace(",",".");
+		$(this).val(str);
+	};
+	
+	if ( (/^[0-9]+\.[0-9]+$/.test(str)) || (/^[0-9]+$/.test(str)) ) {
+		$('#inputSumm').parents('.control-group').removeClass('error');
+		$('#save-operation').prop('disabled', false);
+	} 
+		else {
+			$('#inputSumm').parents('.control-group').addClass('error');
+			$('#save-operation').prop('disabled', true);
+		};		
 });
 
 </script>
