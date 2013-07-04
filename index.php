@@ -300,7 +300,7 @@ $('#inputSumm').keyup(function () {
 		$(this).val(str);
 	};
 	
-	if ( (/^[0-9]+\.[0-9]+$/.test(str)) || (/^[0-9]+$/.test(str)) ) {
+	if ( (/^[0-9]+(\.[0-9]+)?$/.test(str))) {
 		$('#inputSumm').parents('.control-group').removeClass('error');
 		$('#save-operation').prop('disabled', false);
 	} 
