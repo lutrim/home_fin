@@ -179,7 +179,7 @@ if (empty($_POST["op_group"])){
 										from main_history as a INNER JOIN dir_pr as b
 											on a.priznak=b.priznak
 										where (a.op_date between '".$s_date_invers."' and '".$f_date_invers."') and 
-										(a.priznak in ('".implode("','",$_POST["op_group"])."')) order by a.op_date ASC") 
+										(a.priznak in ('".implode("','",$_POST["op_group"])."')) order by a.op_date, a.n_op ASC") 
 										or die(mysqli_errno($link)." : ".mysqli_error($link));
 				break;
 			case 1:
@@ -187,7 +187,7 @@ if (empty($_POST["op_group"])){
 										from main_history as a INNER JOIN dir_pr as b
 											on a.priznak=b.priznak
 										where (a.op_date <= '".$f_date_invers."') and 
-										(a.priznak in ('".implode("','",$_POST["op_group"])."')) order by a.op_date ASC") 
+										(a.priznak in ('".implode("','",$_POST["op_group"])."')) order by a.op_date, a.n_op ASC") 
 										or die(mysqli_errno($link)." : ".mysqli_error($link));
 				break;
 			case 2:
@@ -195,14 +195,14 @@ if (empty($_POST["op_group"])){
 										from main_history as a INNER JOIN dir_pr as b
 											on a.priznak=b.priznak
 										where (a.op_date >= '".$s_date_invers."') and 
-										(a.priznak in ('".implode("','",$_POST["op_group"])."')) order by a.op_date ASC") 
+										(a.priznak in ('".implode("','",$_POST["op_group"])."')) order by a.op_date, a.n_op ASC") 
 										or die(mysqli_errno($link)." : ".mysqli_error($link));
 				break;
 			case 3:
-				$result=mysql_query($link,"select DATE_FORMAT(a.op_date,'%d-%m-%Y') as op_date,a.op_summ,a.comment,b.priznak_text,a.n_op 
+				$result=mysqli_query($link,"select DATE_FORMAT(a.op_date,'%d-%m-%Y') as op_date,a.op_summ,a.comment,b.priznak_text,a.n_op 
 										from main_history as a INNER JOIN dir_pr as b
 											on a.priznak=b.priznak
-										where (a.priznak in ('".implode("','",$_POST["op_group"])."')) order by a.op_date ASC") 
+										where (a.priznak in ('".implode("','",$_POST["op_group"])."')) order by a.op_date, a.n_op ASC") 
 										or die(mysqli_errno($link)." : ".mysqli_error($link));
 				break;
 		}
