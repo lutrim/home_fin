@@ -158,10 +158,13 @@ connect_to_db($bdname, $bdhost, $bduser, $bdpass);
 								on a.priznak=b.priznak
 								where (a.op_date = curdate()) and a.priznak <> 0
 								order by a.n_op") or die(mysqli_errno($link)." : ".mysqli_error($link));
+								$total=0.0;
 								while ($oper=mysqli_fetch_row($result)) {
 									echo 	"<tr class='info'><td>".$oper[0]."</td><td>".$oper[1]."</td><td>".$oper[2]."</td>
 											<td> <input type='checkbox' name='".$oper[3]."'/></td></tr>";
+									$total += $oper[0];
 								}
+								echo "<tfoot><tr class='info'><th>".$total."</th><th colspan='3' align='left'>Итого</th></tfoot>";
 						?>
 					</table>
 					<button type="submit" class="btn btn-danger">удалить отмеченные</button>
