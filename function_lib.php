@@ -30,8 +30,12 @@ FUNCTION add_operation($int_POST)
 	global $link,$db;
 
 //преобразуем дату в удобоваримый формат YYYY-MM-DD
-$date_invers=inverse_date($int_POST["op_date"]);
-
+	$date_invers=inverse_date($int_POST["op_date"]);
+//Определяем относится операция к кредиту или нет
+//Если относится, то изменяем таблицу остатков на кредитную и добавляем префикс CrEdIt в начало строки
+	if ($int_POST["credit_check"] === "on") {$rest_table = "credit_rests"; $int_POST["op_comm"] = "CrEdIt".$int_POST["op_comm"];}
+ 	else {$rest_table = "rests";};
+ 	//echo "rest_table = ".$rest_table."</br>"; 	print_r($int_POST);	die;
 
 //вставим данные в таблицы истории.
 //если поле новой группы пустое, вставляем как обычно
@@ -72,7 +76,7 @@ $date_invers=inverse_date($int_POST["op_date"]);
 		};
 //вставка данный в таблицу остатков по алгоритму выбора
 //сначала получаем максимальную дату в таблице
-$result=mysqli_query($link,"SELECT max(r_date) FROM rests") or die(mysqli_errno($link).mysqli_error($link));
+$result=mysqli_query($link,"SELECT max(r_date) FROM ".$rest_table."") or die(mysqli_errno($link).mysqli_error($link));
 $max_r_date=mysqli_fetch_row($result);
 //echo $max_r_date[0]." максимальная дата остатка </br>";
 //echo $date_invers." Дата операции </br>";
@@ -80,34 +84,34 @@ $max_r_date=mysqli_fetch_row($result);
 //если дата операции равна максимальной дате, то просто увеличиваем последний остаток.
 	if ($date_invers == $max_r_date[0]) {
 		// echo "today </br>";
-		mysqli_query($link,"UPDATE rests set rest_summ=rest_summ+".$int_POST["op_summ"]." where r_date='".$date_invers."'")
+		mysqli_query($link,"UPDATE ".$rest_table." set rest_summ=rest_summ+".$int_POST["op_summ"]." where r_date='".$date_invers."'")
 		or die(mysqli_errno($link).mysqli_error($link));
 	} //если дата операции меньше максимальной даты, то 
 		elseif ($date_invers < $max_r_date[0]) {
 			//echo "YESterday </br>";
-			$result=mysqli_query($link,"select * from rests where r_date = '".$date_invers."' ")
+			$result=mysqli_query($link,"select * from ".$rest_table." where r_date = '".$date_invers."' ")
 					or die("ошибка ".mysqli_errno($link)." Текст: ".mysqli_error($link));
 			//проверяем есть ли в таблице остаков остаток за введенную дату? 
 				if (!mysqli_fetch_row($result)) { //если нет, то добавляем строчку с нужной датой и значением остатка, равному предыдущей дате
 					//echo "Вставка </br>";
-					$result=mysqli_query($link,"select rest_summ from rests where r_date in ( select max(r_date) from rests where r_date < '".$date_invers."') ")
+					$result=mysqli_query($link,"select rest_summ from ".$rest_table." where r_date in ( select max(r_date) from ".$rest_table." where r_date < '".$date_invers."') ")
 							or die(mysqli_errno($link).mysqli_error($link));
 					$max_l_rest=mysqli_fetch_row($result);
 					//print_r($max_l_rest); echo " максимальный последний остаток </br>";
-					mysqli_query($link,"insert into rests (r_date,rest_summ) VALUES ('".$date_invers."' , ".$max_l_rest[0].")")
+					mysqli_query($link,"insert into ".$rest_table." (r_date,rest_summ) VALUES ('".$date_invers."' , ".$max_l_rest[0].")")
 					or die(mysqli_errno($link).mysqli_error($link));
 				};
 			//и прибавляем сумму операции ко всем остаткам больше или равным (по дате) введенному
-			mysqli_query($link,"UPDATE rests set rest_summ=(rest_summ+(".$int_POST["op_summ"].")) where r_date >= '".$date_invers."'")
+			mysqli_query($link,"UPDATE ".$rest_table." set rest_summ=(rest_summ+(".$int_POST["op_summ"].")) where r_date >= '".$date_invers."'")
 			or die(mysqli_errno($link)." : ".mysqli_error($link));
 		} //если дата операции больше максимальной, то добавляем новую строчку в таблицу остатков, с остатком добавленным к последнему.
 			elseif ($date_invers > $max_r_date[0]) {
 				//echo "current </br>";
-				$result=mysqli_query($link,"SELECT rest_summ FROM rests where r_date in (select max(r_date) from rests)")
+				$result=mysqli_query($link,"SELECT rest_summ FROM ".$rest_table." where r_date in (select max(r_date) from ".$rest_table.")")
 				or die(mysqli_errno($link)." : ".mysqli_error($link));
 				$max_rest=mysqli_fetch_row($result);
 				//print_r($max_rest); echo " + ".$int_POST["op_summ"]." максимальная остаток и сколько прибавляем</br>";
-				mysqli_query($link,"INSERT INTO rests (r_date,rest_summ) VALUES ( '".$date_invers."' , ".($max_rest[0]+$int_POST["op_summ"]).") ")
+				mysqli_query($link,"INSERT INTO ".$rest_table." (r_date,rest_summ) VALUES ( '".$date_invers."' , ".($max_rest[0]+$int_POST["op_summ"]).") ")
 				or die(mysqli_errno($link)." : ".mysqli_error($link));
 			}
 

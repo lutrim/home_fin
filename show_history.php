@@ -208,7 +208,13 @@ if (empty($_POST["op_group"])){
 		}
 		$total=0.0;
 		while ($oper=mysqli_fetch_row($result)) {
-			echo "<tr class='info'><td>".$oper[0]."</td><td>".$oper[1]."</td><td>".$oper[2]."</td><td>".$oper[3]."</td>
+			//удаляем префикс кредита, если есть, и красим строку в красный.
+			$obs_class = "info";
+			if (substr($oper[2],0,6) === "CrEdIt") {
+				$obs_class = "error";
+				$oper[2] = substr($oper[2], 6);
+			};
+			echo "<tr class='".$obs_class."'><td>".$oper[0]."</td><td>".$oper[1]."</td><td>".$oper[2]."</td><td>".$oper[3]."</td>
 					<td><label class='checkbox'><input type='checkbox' name='".$oper[4]."'/></label></td></tr>";
 			$total += $oper[1];
 			}

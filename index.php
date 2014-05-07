@@ -70,10 +70,9 @@ putenv("TZ=Europe/Moscow");
 connect_to_db($bdname, $bdhost, $bduser, $bdpass);
 ?>
 <DIV class="row-fluid">
-	<div class="span9">
-		<div class="row-fluid">
-			<div class="span6 well">
-	<!-- Ввод данных и текущие данные-->
+	<div class="span5">
+		<div class="well">
+		<!-- Ввод данных и текущие данные-->
 			<form class="form-horizontal" action="put_to_tbl.php" method="post">
 				<div class="control-group">
 					<label class="control-label" for="inputDate">Дата:</label>
@@ -104,6 +103,7 @@ connect_to_db($bdname, $bdhost, $bduser, $bdpass);
 								echo "</optgroup>";
 							?>		
 						</select>
+						<input type='checkbox' name='credit_check' class='credit_check_class'>
 					</div>
 				</div>
 				<div class="control-group">
@@ -138,85 +138,115 @@ connect_to_db($bdname, $bdhost, $bduser, $bdpass);
 					</div>
 				</div>
 			</form>
-			</div>
-			<div class="span6 well">
-				<form action="delete_pack_op.php" method="post">
-					<table class="table table-condensed table-bordered" id="operation_table">
-						<?php
-							echo "<caption>Таблица операций за сегодняшний день ".date("d.m.Y").":</caption>";
-						?>			
-					<!--заголовки -->
-						<tr class="lut_header">
-							<th> Сумма </br> операции</th>
-							<th> Комментарии</th>
-							<th> Группа операции</th>
-							<th> </th>
-						</tr>
-						<?php
-							$result=mysqli_query($link,"select a.op_summ,a.comment,b.priznak_text,a.n_op 
-								from main_history as a INNER JOIN dir_pr as b
-								on a.priznak=b.priznak
-								where (a.op_date = curdate()) and a.priznak <> 0
-								order by a.n_op") or die(mysqli_errno($link)." : ".mysqli_error($link));
-								$total=0.0;
-								while ($oper=mysqli_fetch_row($result)) {
-									echo 	"<tr class='info'><td>".$oper[0]."</td><td>".$oper[1]."</td><td>".$oper[2]."</td>
-											<td> <input type='checkbox' name='".$oper[3]."'/></td></tr>";
-									$total += $oper[0];
-								}
-								echo "<tfoot><tr class='info'><th>".$total."</th><th colspan='3' align='left'>Итого</th></tfoot>";
-						?>
-					</table>
-					<button type="submit" class="btn btn-danger">удалить отмеченные</button>
-				</form>
-			</div>
 		</div>
-		<div class="row-fluid">
-<!-- Фильтры и разрезы-->
-			<div class="span6 well">
+		<div class="well">
 		<!-- Форма вывода операций-->
-				<form class="form-horizontal" action="show_history.php" method="post"> 
-					<div class="control-group">
-						<label>Показать все операции за указннный интервал:</label>
-							<div class="controls controls-row">
-								<input class="datepicker input-small span6" id="start_history_interval" type="text" name="s_op_date" value="1 <?php echo date("m Y") ?>" />
-								<input class="datepicker input-small span6" id="end_history_interval" type="text" name="f_op_date" value="<?php echo date("j m Y")?>" />
-							</div>
-					</div>			
-					<div class="control-group">
-						<label class="control-label" for="history_groups">по группам</label>
-							<div class="controls controls-row">
-								<a href="#" class="span1 history-select"><i class="icon-ok"></i></a> <a href="#" class="span1 history-deselect"><i class="icon-remove"></i></a>							
-								<select class="span10 selectpicker history-view" name="op_group[]" multiple data-selected-text-format="count>2" data-size="6"> 
-									<?php 
-										//выберем данные для статьи расхода
-										echo "<optgroup label='Расход'>";
-										$result=mysqli_query($link,"SELECT * FROM dir_pr where priznak < 0") or die(mysqli_errno($link)." : ".mysqli_error($link));
-										//выведем результаты в HTML-документ
-											while($data_pr=mysqli_fetch_row($result)) {
-												echo "<option selected value=",$data_pr[0],">",$data_pr[1]."</option>";
-											}
-										echo "</optgroup>";
-										//выберем данные для статьи Прихода
-										echo "<optgroup label='Приход'>";
-										$result=mysqli_query($link,"SELECT * FROM dir_pr where priznak > 0") or die(mysqli_errno($link)." : ".mysqli_error($link));
-										//выведем результаты в HTML-документ
-											while($data_pr=mysqli_fetch_row($result)) {
-												echo "<option value=",$data_pr[0],">",$data_pr[1]."</option>";
-											}
-										echo "</optgroup>";
-									?>	   
-								</select>
-							</div>	
-					</div>
-					<div class="control-group">
-						<div class="controls">
-							<button type="submit" class="btn btn-primary" >Показать</button>
+			<form class="form-horizontal" action="show_history.php" method="post"> 
+				<div class="control-group">
+					<label>Показать все операции за указннный интервал:</label>
+						<div class="controls controls-row">
+							<input class="datepicker input-small span6" id="start_history_interval" type="text" name="s_op_date" value="1 <?php echo date("m Y") ?>" />
+							<input class="datepicker input-small span6" id="end_history_interval" type="text" name="f_op_date" value="<?php echo date("j m Y")?>" />
 						</div>
+				</div>			
+				<div class="control-group">
+					<label class="control-label" for="history_groups">по группам</label>
+						<div class="controls controls-row">
+							<a href="#" class="span1 history-select"><i class="icon-ok"></i></a> <a href="#" class="span1 history-deselect"><i class="icon-remove"></i></a>							
+							<select class="span10 selectpicker history-view" name="op_group[]" multiple data-selected-text-format="count>2" data-size="6"> 
+								<?php 
+									//выберем данные для статьи расхода
+									echo "<optgroup label='Расход'>";
+									$result=mysqli_query($link,"SELECT * FROM dir_pr where priznak < 0") or die(mysqli_errno($link)." : ".mysqli_error($link));
+									//выведем результаты в HTML-документ
+										while($data_pr=mysqli_fetch_row($result)) {
+											echo "<option selected value=",$data_pr[0],">",$data_pr[1]."</option>";
+										}
+									echo "</optgroup>";
+									//выберем данные для статьи Прихода
+									echo "<optgroup label='Приход'>";
+									$result=mysqli_query($link,"SELECT * FROM dir_pr where priznak > 0") or die(mysqli_errno($link)." : ".mysqli_error($link));
+									//выведем результаты в HTML-документ
+										while($data_pr=mysqli_fetch_row($result)) {
+											echo "<option value=",$data_pr[0],">",$data_pr[1]."</option>";
+										}
+									echo "</optgroup>";
+								?>	   
+							</select>
+						</div>	
+				</div>
+				<div class="control-group">
+					<div class="controls">
+						<button type="submit" class="btn btn-primary" >Показать</button>
 					</div>
-				</form>
-			</div>
-			<div class="span6 well">
+				</div>
+			</form>
+		</div>
+	</div>
+	<div class="span4">
+		<div class="well">
+			<form action="delete_pack_op.php" method="post">
+				<table class="table table-condensed table-bordered" id="operation_table">
+					<?php
+						echo "<caption>Таблица операций за сегодняшний день ".date("d.m.Y").":</caption>";
+					?>			
+				<!--заголовки -->
+					<tr class="lut_header">
+						<th> Сумма </br> операции</th>
+						<th> Комментарии</th>
+						<th> Группа операции</th>
+						<th> </th>
+					</tr>
+					<?php
+						$result=mysqli_query($link,"select a.op_summ,a.comment,b.priznak_text,a.n_op 
+							from main_history as a INNER JOIN dir_pr as b
+							on a.priznak=b.priznak
+							where (a.op_date = curdate()) and a.priznak <> 0
+							order by a.n_op") or die(mysqli_errno($link)." : ".mysqli_error($link));
+							$total = 0.0;
+							while ($oper=mysqli_fetch_row($result)) {
+								//удаляем префикс кредита, если есть, и красим строку в красный.
+								$obs_class = "info";
+								if (substr($oper[1],0,6) === "CrEdIt") {
+									$obs_class = "error";
+									$oper[1] = substr($oper[1], 6);
+								};
+								echo 	"<tr class='".$obs_class."'><td>".$oper[0]."</td><td>".$oper[1]."</td><td>".$oper[2]."</td>
+										<td> <input type='checkbox' name='".$oper[3]."'/></td></tr>";
+								$total += $oper[0];
+							}
+						echo "<tfoot><tr class='info'><th>".$total."</th><th colspan='3' align='left'>Итого</th></tr></tfoot>";
+					?>
+				</table>
+				<button type="submit" class="btn btn-danger">удалить отмеченные</button>
+			</form>
+		</div>
+		<table class="table table-condensed table-bordered" id="credit_table">	
+			<caption> Таблица остатков по кредиту за 15 дней </caption>
+				<tr class="lut_header">
+					<th> дата </th>
+					<th> сумма кредита на дату</th>
+				</tr>
+				<?php
+				$result=mysqli_query($link,"select DATE_FORMAT(r_date,'%d-%m-%Y'),rest_summ from credit_rests  
+					where r_date >= DATE_SUB(CURDATE(), INTERVAL 15 DAY) 
+					order by r_date") or die(mysqli_errno($link)." : ".mysqli_error($link));
+					while ($rests=mysqli_fetch_row($result)) {
+						echo "<tr class='info'><td >".$rests[0]."</td><td >".$rests[1]."</td></tr>";
+					}
+				$result_credit=mysqli_query($link,"select rest_summ from credit_rests 
+					where r_date=(select max(r_date) from credit_rests)") or die(mysqli_errno($link)." : ".mysqli_error($link));
+				$credit_rest = mysqli_fetch_row($result_credit);
+				$result_rests=mysqli_query($link,"select rest_summ from rests 
+					where r_date=(select max(r_date) from rests)") or die(mysqli_errno($link)." : ".mysqli_error($link));
+				$rest = mysqli_fetch_row($result_rests);
+				$total = $rest[0] + $credit_rest[0];
+				echo "<tfoot><tr><th>".$total."</th><th align='left'>Остаток с вычетом суммы кредита</th></tr></tfoot>";
+				?>
+		</table>
+	</div>
+	<div class="span3">
+		<div class="well">
 		<!-- Форма вывода остатков-->
 			<form class="form-hoirizontal">
 				<div class="control-group">
@@ -235,11 +265,8 @@ connect_to_db($bdname, $bdhost, $bduser, $bdpass);
 					</div>
 				</div>
 			</form>
-			</div>
 		</div>
-	</div>
-<!-- Таблица остатков -->
-	<div class="span3">
+		<!-- Таблица остатков -->
 		<table class="table table-condensed table-bordered" id="rests_table">
 		<caption>Таблица остатков за 15 дней:</caption>
 			<!--заголовки -->
@@ -277,6 +304,7 @@ $('.history-deselect').click(function() {
 
 $('.history-select').tooltip({'trigger':'hover', 'placement':'top', 'title': 'Выделить все'});
 $('.history-deselect').tooltip({'trigger':'hover', 'placement':'top', 'title': 'Снять выделение'});
+$('.credit_check_class').tooltip({'trigger':'hover', 'placement':'top', 'title': 'Отметить, если расход с кредитной карты'})
 
 $('#inputGroup').tooltip({'trigger':'focus', 'placement':'right', 'title': 'Заполнять только если надо добавить новую группу'});
 
