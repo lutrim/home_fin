@@ -12,7 +12,7 @@ connect_to_db($bdname, $bdhost, $bduser, $bdpass);
 //echo $_POST["new-group-radio"];
 //die;
 //Если это приход средств для погашения кредита, то изменяем пост так, чтобы он не отображался в истории
-if ($_POST["credit_check"] === "on") {
+if ($_POST["credit_check"] === "on" and $_POST["op_group"] === "2") {
 	$_POST["op_summ"] = abs($_POST["op_summ"]);
 	$_POST["op_group"] = 0;
 }
@@ -23,8 +23,9 @@ if ($_POST["credit_check"] === "on") {
 	$_POST["op_summ"] = -1 * abs($_POST["op_summ"]);
 	$_POST["op_group"] = 0;
 	$_POST["credit_check"] = "off";
+	add_operation($_POST);
 }
-add_operation($_POST);
+
 mysqli_close($link);
 header('Location: index.php');
 
