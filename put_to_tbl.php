@@ -12,14 +12,16 @@ connect_to_db($bdname, $bdhost, $bduser, $bdpass);
 //echo $_POST["new-group-radio"];
 //die;
 //Если это приход средств для погашения кредита, то изменяем пост так, чтобы он не отображался в истории
+$flag_credit = 0;
 if ($_POST["credit_check"] === "on" and $_POST["op_group"] === "2") {
 	$_POST["op_summ"] = abs($_POST["op_summ"]);
 	$_POST["op_group"] = 0;
+	$flag_credit = 1;
 }
 
 add_operation($_POST);
 //проверяем, если это приход средств для погашения кредита, то проводим еще одну операцию для снятия денег с основного остатка
-if ($_POST["credit_check"] === "on" and $_POST["op_group"] === "2") {
+if ($_POST["credit_check"] === "on" and $flag_credit === 1) {
 	$_POST["op_summ"] = -1 * abs($_POST["op_summ"]);
 	$_POST["op_group"] = 0;
 	$_POST["credit_check"] = "off";
