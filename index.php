@@ -229,7 +229,7 @@ connect_to_db($bdname, $bdhost, $bduser, $bdpass);
 				</tr>
 				<?php
 				$result=mysqli_query($link,"select DATE_FORMAT(r_date,'%d-%m-%Y'),rest_summ from credit_rests  
-					where r_date >= DATE_SUB(CURDATE(), INTERVAL 15 DAY) 
+					where r_date >= DATE_SUB(CURDATE(), INTERVAL 15 DAY) or r_date = (select max(r_date) from credit_rests)
 					order by r_date") or die(mysqli_errno($link)." : ".mysqli_error($link));
 					while ($rests=mysqli_fetch_row($result)) {
 						echo "<tr class='info'><td >".$rests[0]."</td><td >".$rests[1]."</td></tr>";
@@ -276,7 +276,7 @@ connect_to_db($bdname, $bdhost, $bduser, $bdpass);
 			</tr>
 			<?php
 				$result=mysqli_query($link,"select DATE_FORMAT(r_date,'%d-%m-%Y'),rest_summ from rests  
-					where r_date >= DATE_SUB(CURDATE(), INTERVAL 15 DAY) 
+					where r_date >= DATE_SUB(CURDATE(), INTERVAL 15 DAY) or r_date=(select max(r_date) from rests)
 					order by r_date") or die(mysqli_errno($link)." : ".mysqli_error($link));
 					while ($rests=mysqli_fetch_row($result)) {
 						echo "<tr class='info'><td >".$rests[0]."</td><td >".$rests[1]."</td></tr>";
