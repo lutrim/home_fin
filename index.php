@@ -65,7 +65,7 @@ $link;
 $bdhost; $bdname; $bduser; $bdpass;
 include 'bdpass.php';
 include 'function_lib.php';
-putenv("TZ=Europe/Moscow");
+date_default_timezone_set('Europe/Minsk');
 //-----------------------------> Connect on DB
 connect_to_db($bdname, $bdhost, $bduser, $bdpass);
 ?>
