@@ -42,9 +42,11 @@ FUNCTION add_operation($int_POST)
 	if ($int_POST["new_group"]=="") {
 		//echo "popal null";
 		//определяем знак операции, нулевая группа (удаление)
+		//3 группа кредиты, знак так же не меняем
 		if ($int_POST["op_group"] == 0) {}
-			elseif ($int_POST["op_group"] > 0) { $int_POST["op_summ"] = abs($int_POST["op_summ"]);}
-				else {$int_POST["op_summ"] = -1 * abs($int_POST["op_summ"]);};
+			elseif ($int_POST["op_group"] == 3) {}
+				elseif ($int_POST["op_group"] > 0) { $int_POST["op_summ"] = abs($int_POST["op_summ"]);}
+					else {$int_POST["op_summ"] = -1 * abs($int_POST["op_summ"]);};
 		//всталяем данные
 		mysqli_query($link,"INSERT INTO main_history (n_op, op_date, op_summ, comment, priznak)
 		VALUES (NULL, '".$date_invers."' , '".$int_POST["op_summ"]."', '".$int_POST["op_comm"]."', '".$int_POST["op_group"]."')") 
