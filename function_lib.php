@@ -10,7 +10,7 @@ $link=mysqli_connect($host,$user,$pass) or die(mysqli_errno($link).mysqli_error(
 $db=mysqli_select_db($link,$db_name) or die(mysqli_errno($link).mysqli_error($link));
 //установка региональных настроек, кодировка, часовой пояс
 mysqli_set_charset($link,'utf8'); 
-$result=mysqli_query($link,"SET time_zone='+4:00';") or die(mysqli_errno($link).mysqli_error($link));
+$result=mysqli_query($link,"SET time_zone='+3:00';") or die(mysqli_errno($link).mysqli_error($link));
 return $retval;
 }
 
