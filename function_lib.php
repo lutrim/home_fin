@@ -44,7 +44,7 @@ FUNCTION add_operation($int_POST)
 		//определяем знак операции, нулевая группа (удаление)
 		//3 группа кредиты, знак так же не меняем
 		if ($int_POST["op_group"] == 0) {}
-			elseif ($int_POST["op_group"] == 3) {}
+			elseif ($int_POST["op_group"] == -21) {}
 				elseif ($int_POST["op_group"] > 0) { $int_POST["op_summ"] = abs($int_POST["op_summ"]);}
 					else {$int_POST["op_summ"] = -1 * abs($int_POST["op_summ"]);};
 		//всталяем данные
