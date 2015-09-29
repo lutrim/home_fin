@@ -62,7 +62,8 @@ FUNCTION add_operation($int_POST)
 			$result=mysqli_query($link,"SELECT priznak from dir_pr where UCASE(priznak_text) = UCASE('".$int_POST["new_group"]."')")
 			or die("ошибка ".mysqli_errno($link)." Текст: ".mysqli_error($link));
 			$op_group=mysqli_fetch_row($result);
-			if ($op_group <> "") {$int_POST["op_group"]=$op_group[0]; print_r($int_POST); echo " </br>";} else { //Если такой группы действительно нет, то добавляем
+			if ($op_group <> "") {$int_POST["op_group"]=$op_group[0]; echo "Такая группа уже есть. Надо закрыть страницу и открыть заново. </br>";
+								 print_r($int_POST); echo " </br>"; die; } else { //Если такой группы действительно нет, то добавляем
 			mysqli_query($link,"insert into dir_pr (priznak,priznak_text)
 									select 
 										case
