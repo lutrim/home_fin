@@ -241,6 +241,8 @@ connect_to_db($bdname, $bdhost, $bduser, $bdpass);
 					where r_date=(select max(r_date) from rests)") or die(mysqli_errno($link)." : ".mysqli_error($link));
 				$rest = mysqli_fetch_row($result_rests);
 				$total = $rest[0] + $credit_rest[0];
+				$total_sms = 35000 + $credit_rest[0];
+				echo "<tfoot><tr><th>".$total_sms."</th><th align='left'>Эта сумма должна быть в СМС</th></tr></tfoot>";
 				echo "<tfoot><tr><th>".$total."</th><th align='left'>Остаток с вычетом суммы кредита</th></tr></tfoot>";
 				?>
 		</table>
