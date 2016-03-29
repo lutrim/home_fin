@@ -141,7 +141,7 @@ connect_to_db($bdname, $bdhost, $bduser, $bdpass);
 		</div>
 		<div class="well">
 		<!-- Форма вывода операций-->
-			<form class="form-horizontal" action="show_history.php" method="post"> 
+			<form name="show_hist" class="form-horizontal" action="show_history.php" method="post"> 
 				<div class="control-group">
 					<label>Показать все операции за указннный интервал:</label>
 						<div class="controls controls-row">
@@ -177,7 +177,8 @@ connect_to_db($bdname, $bdhost, $bduser, $bdpass);
 				</div>
 				<div class="control-group">
 					<div class="controls">
-						<button type="submit" class="btn btn-primary" >Показать</button>
+						<button type="submit" class="btn btn-primary">Показать</button>
+						<button type="submit" class="btn btn-primary" onclick="show_hist.action='show_pie.php';  return true;">Рисовать</button>
 					</div>
 				</div>
 			</form>
