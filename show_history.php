@@ -22,7 +22,7 @@
 	</style>
 <SCRIPT>
 function delete_button_click() {//нажатие кнопки удаления записей
-	var fields = $("input[class=delete_checkbox]");
+	var fields = $('input.delete_checkbox');
 	var data_checkbox = {};
 	jQuery.each( fields, function( i, field ) {
 	    if (field.checked) {data_checkbox[field.name] = field.value};

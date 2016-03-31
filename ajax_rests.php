@@ -52,7 +52,7 @@ if (date_create($f_date_invers) < date_create($s_date_invers)) {
 ?>
 <!-- таблица остатков -->
 	<!--заголовки -->
-	<caption>Таблица остатков за выбранный интервал дат:</caption>
+	<caption>Таблица остатков.</caption>
 		<tr class="lut_header">
 			<th > Дата</th>
 			<th > Остаток на дату</th>
