@@ -8,7 +8,7 @@
 	<!-- addons bootstrap-->
 	<link href="Tools/datepicker/css/datepicker.css" rel="stylesheet" media="screen">
 	<link href="Tools/bootstrap-select/bootstrap-select.min.css" rel="stylesheet" media="screen">
-	<script src="http://code.jquery.com/jquery-latest.js"></script>
+	<script src="http://code.jquery.com/jquery-latest.min.js"></script>
 	<script src="Tools/bootstrap/js/bootstrap.min.js"></script>	
 	<script src="Tools/datepicker/js/bootstrap-datepicker.js"></script>
 	<script charset="UTF-8" src="Tools/datepicker/js/locales/bootstrap-datepicker.ru.js"></script>
@@ -22,9 +22,9 @@
 			}
 		.lut_header{background: #CDCDCD;}
 	</style>	
-<script>
+<SCRIPT>
 var xmlhttp;
-function loadXMLDoc(url,elid)
+function loadXMLDoc(url,elid) //функция вызываемая при нажатии обновления остатков.
 {
 if (window.XMLHttpRequest)
   {// code for IE7+, Firefox, Chrome, Opera, Safari
@@ -45,7 +45,7 @@ xmlhttp.open("GET",url,true);
 xmlhttp.send();
 }
 
-function r_get_url()
+function r_get_url() //функция формирующая GET запрос для обновления остатков.
 	{
 		var arg_value = document.getElementById(arguments[1]).value;
 		var str = arguments[0]+"?";
@@ -57,7 +57,36 @@ function r_get_url()
 //		alert(str);
 		return str;
 	}
-</script>	
+
+function delete_button_click() {//нажатие кнопки удаления записей
+	var fields = $("input[class=delete_checkbox]");
+	var data_checkbox = {};
+	jQuery.each( fields, function( i, field ) {
+	    if (field.checked) {data_checkbox[field.name] = field.value};
+	});
+	$.post(
+  		"delete_pack_op.php",
+  		data_checkbox,
+  		onAjaxSuccess_delete
+	);
+}
+
+function onAjaxSuccess_delete(data)  //Функция после успешного аякса на удаление(удаляет строки в таблице считает итого)
+{
+ 	// Здесь мы получаем данные, отправленные сервером и выводим их на экран.
+ 	debugger;
+ 	//$('#test_div').text(data);//венуть в текстовый див значение
+ 	var string_for_delete = JSON.parse(data);
+ 	var sum_total = parseFloat($('#sum_total').text());
+ 	$(string_for_delete.map(function(i){
+ 		var cell_id = 'c' + i;
+ 		sum_total = sum_total - parseFloat($('#' + cell_id).text());
+ 		return '#' + i
+ 	}).join(',')).remove();
+ 	$('#sum_total').text(Math.round(sum_total*100)/100);
+}
+
+</SCRIPT>	
 </head>
 <BODY>
 <?php
@@ -72,7 +101,9 @@ connect_to_db($bdname, $bdhost, $bduser, $bdpass);
 <DIV class="row-fluid">
 	<div class="span5">
 		<div class="well">
-		<!-- Ввод данных и текущие данные-->
+
+<!--**********************************************************ФОМА ВВОДА ДАННЫХ*********************************************************-->	
+
 			<form class="form-horizontal" action="put_to_tbl.php" method="post">
 				<div class="control-group">
 					<label class="control-label" for="inputDate">Дата:</label>
@@ -134,13 +165,15 @@ connect_to_db($bdname, $bdhost, $bduser, $bdpass);
 				</div>
 				<div class="control-group">
 					<div class="controls">
-						<button type="submit" class="btn btn-primary" id="save-operation" disabled="true">Сохранить</button>
+						<button type="submit" class="btn btn-primary" id="save-operation" disabled="true">Схоронить</button>
 					</div>
 				</div>
 			</form>
 		</div>
 		<div class="well">
-		<!-- Форма вывода операций-->
+
+<!--********************************************ФОМА РАЗРЕЗОВ ГРАФИКОВ И ИСТОРИЙ*********************************************************-->	
+
 			<form name="show_hist" class="form-horizontal" action="show_history.php" method="post"> 
 				<div class="control-group">
 					<label>Показать все операции за указннный интервал:</label>
@@ -177,8 +210,8 @@ connect_to_db($bdname, $bdhost, $bduser, $bdpass);
 				</div>
 				<div class="control-group">
 					<div class="controls">
-						<button type="submit" class="btn btn-primary">Показать</button>
-						<button type="submit" class="btn btn-primary" onclick="show_hist.action='show_pie.php';  return true;">Рисовать</button>
+						<button type="submit" class="btn btn-primary">Показать табличку</button>
+						<button type="submit" class="btn btn-primary" onclick="show_hist.action='show_pie.php';  return true;">Рисовать кружок</button>
 					</div>
 				</div>
 			</form>
@@ -186,6 +219,9 @@ connect_to_db($bdname, $bdhost, $bduser, $bdpass);
 	</div>
 	<div class="span4">
 		<div class="well">
+
+<!--********************************************ФОМА ОПЕРАЦИЙ ЗА СЕГОДНЯШНИЙ ДЕНЬ*********************************************************-->	
+
 			<form action="delete_pack_op.php" method="post">
 				<table class="table table-condensed table-bordered" id="operation_table">
 					<?php
@@ -212,16 +248,19 @@ connect_to_db($bdname, $bdhost, $bduser, $bdpass);
 									$obs_class = "error";
 									$oper[1] = substr($oper[1], 6);
 								};
-								echo 	"<tr class='".$obs_class."'><td>".$oper[0]."</td><td>".$oper[1]."</td><td>".$oper[2]."</td>
-										<td> <input type='checkbox' name='".$oper[3]."'/></td></tr>";
+								echo 	"<tr id='".$oper[3]."' class='".$obs_class."'><td id='c".$oper[3]."'>".$oper[0]."</td><td>".$oper[1]."</td><td>".$oper[2]."</td>
+										<td> <input class='delete_checkbox' type='checkbox' name='".$oper[3]."'/></td></tr>";
 								$total += $oper[0];
 							}
-						echo "<tfoot><tr class='info'><th>".$total."</th><th colspan='3' align='left'>Итого</th></tr></tfoot>";
+						echo "<tfoot><tr class='info'><th id='sum_total'>".$total."</th><th colspan='3' align='left'>Итого</th></tr></tfoot>";
 					?>
 				</table>
-				<button type="submit" class="btn btn-danger">удалить отмеченные</button>
+				<button type="button" onclick="delete_button_click()" class="btn btn-danger">Убрать мусор</button>
 			</form>
 		</div>
+
+<!--********************************************Таблица кредита*********************************************************-->	
+
 		<table class="table table-condensed table-bordered" id="credit_table">	
 			<caption> Таблица остатков по кредиту за 15 дней </caption>
 				<tr class="lut_header">
@@ -250,7 +289,9 @@ connect_to_db($bdname, $bdhost, $bduser, $bdpass);
 	</div>
 	<div class="span3">
 		<div class="well">
-		<!-- Форма вывода остатков-->
+
+<!--********************************************ФОМА ВЫВОДА ОСТАТКОВ*********************************************************-->	
+
 			<form class="form-hoirizontal">
 				<div class="control-group">
 					<label>Показать все изменения остатка за указннный интервал:</label>
@@ -287,7 +328,7 @@ connect_to_db($bdname, $bdhost, $bduser, $bdpass);
 			?>
 		</table>
 	</div>
-<script>
+<SCRIPT>
 $('.datepicker').datepicker({
 	format: "d mm yyyy",
 	weekStart: 1,
@@ -344,7 +385,7 @@ $('#inputSumm').keyup(function () {
 		};		
 });
 
-</script>
+</SCRIPT>
 </DIV>
 <?php mysqli_close($link); ?>
 </BODY>

@@ -24,6 +24,7 @@ $f_date_invers = inverse_date($_GET["end_rest_interval_date"]);
 //}
 //блок преобразования дат завершен
 //echo $s_date_invers;
+//print_r($_POST);
 //echo date_create($f_date_invers)->format('d-m-Y')."   <    ".date_create($s_date_invers)->format('d-m-Y')."</br>";
 //блок проверок. Проверка на правильность параметров:
 $data=date_create($f_date_invers);

@@ -20,6 +20,36 @@
 		.lut_header{background: #CDCDCD;}
 		.bootstrap-select {float: left !important;}
 	</style>
+<SCRIPT>
+function delete_button_click() {//нажатие кнопки удаления записей
+	var fields = $("input[class=delete_checkbox]");
+	var data_checkbox = {};
+	jQuery.each( fields, function( i, field ) {
+	    if (field.checked) {data_checkbox[field.name] = field.value};
+	});
+	$.post(
+  		"delete_pack_op.php",
+  		data_checkbox,
+  		onAjaxSuccess_delete
+	);
+}
+
+function onAjaxSuccess_delete(data)  //Функция после успешного аякса на удаление(удаляет строки в таблице считает итого)
+{
+ 	// Здесь мы получаем данные, отправленные сервером и выводим их на экран.
+ 	debugger;
+ 	//$('#test_div').text(data);//венуть в текстовый див значение
+ 	var string_for_delete = JSON.parse(data);
+ 	var sum_total = parseFloat($('#sum_total').text());
+ 	$(string_for_delete.map(function(i){
+ 		var cell_id = 'c' + i;
+ 		sum_total = sum_total - parseFloat($('#' + cell_id).text());
+ 		return '#' + i
+ 	}).join(',')).remove();
+ 	$('#sum_total').text(Math.round(sum_total*100)/100);
+}
+
+</SCRIPT>	
 </head>
 <BODY>
 <?php
@@ -214,15 +244,15 @@ if (empty($_POST["op_group"])){
 				$obs_class = "error";
 				$oper[2] = substr($oper[2], 6);
 			};
-			echo "<tr class='".$obs_class."'><td>".$oper[0]."</td><td>".$oper[1]."</td><td>".$oper[2]."</td><td>".$oper[3]."</td>
-					<td><label class='checkbox'><input type='checkbox' name='".$oper[4]."'/></label></td></tr>";
+			echo "<tr id='".$oper[4]."' class='".$obs_class."'><td>".$oper[0]."</td><td id='c".$oper[4]."'>".$oper[1]."</td><td>".$oper[2]."</td><td>".$oper[3]."</td>
+					<td><label class='checkbox'><input class='delete_checkbox' type='checkbox' name='".$oper[4]."'/></label></td></tr>";
 			$total += $oper[1];
 			}
-		echo "<tfoot><tr class='info'><th>Итого</th><th colspan='4' align='left'>".$total."</th></tfoot>";
+		echo "<tfoot><tr class='info'><th>Итого</th><th colspan='4' align='left' id='sum_total'>".$total."</th></tfoot>";
 		?>
 			</tbody>
 		</table>
-		<!-- <input type="submit" value="удалить отмеченные"/> -->
+		<button type="button" onclick="delete_button_click()" class="btn btn-danger">Убрать мусор</button>
 	</form>
 
 
