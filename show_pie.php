@@ -225,8 +225,8 @@ $total=0.0;
 			type: "pie",
 			showInLegend: true,
 			legendText: "{indexLabel} {y}",
-			indexLabel: "{indexLabel} {y}",
-			toolTipContent:"{indexLabel} {y}",
+			indexLabel: "{indexLabel}",
+			toolTipContent:"{y} - #percent %",
 			dataPoints: [
 			<?php 
 			$i=1;
